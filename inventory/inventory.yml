@@ -1,0 +1,114 @@
+linode:
+  hosts:
+    pwn:
+      hostname: "pwn.freddyal.com"
+
+      ansible_python_interpreter: /usr/bin/python3
+      ansible_ssh_private_key_file: "~/.ssh/devops"
+      ansible_ssh_public_key_file: "~/.ssh/devops.pub"
+      ansible_ssh_user: 'ansible'
+
+      # Create Users
+      users:
+        - username: freddyal
+          name: Freddy Al
+          authorized_keys:
+            - "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+            #- "https://github.com/ralphte.keys"
+          home_create: yes
+          append: yes
+          home_mode: "0750"
+          shell: '/bin/bash'
+      
+      users_authorized_keys_exclusive: yes
+      security_sudoers_passwordless:
+        - freddyal
+
+      # Docker Settings
+      dockernet: "docker"
+      docker_home_dir: '/opt/docker'
+
+      # Pip Settings
+      pip_install_packages:
+        - name: docker
+      pip_executable: pip3
+      pip_package: python3-pip
+
+      # NTP
+      ntp_timezone: 'America/New_York'
+
+    localhost:
+      ansible_python_interpreter: /usr/bin/python3
+      ansible_ssh_private_key_file: "~/.ssh/devops"
+      ansible_ssh_public_key_file: "~/.ssh/devops.pub"
+      ansible_ssh_user: 'ansible'
+      terraform:
+      - resource: 
+        resource_type: "dns"
+        resource_name: "pwn"
+        provider: "linode"
+        domain_name: "freddyal.com"
+        vm_provider: "linode"
+        dns_type: "A"
+        value: "pwn"
+        hostnames:
+          - "pwn"
+      - resource: 
+        resource_type: "vm"
+        resource_name: "pwn"
+        provider: "linode"
+        name: "pwn"
+        img: "linode/ubuntu20.04"
+        region: "us-southeast"
+        type: "g6-standard-1"
+        firewall:
+          - rule: 
+            label: "allow-http"
+            type: inbound
+            protocol: "TCP"
+            action: "ACCEPT"
+            ports: "80"
+            ipv4_addresses:
+              - "0.0.0.0/0"
+            ipv6_addresses:
+              - "::/0"
+          - rule: 
+            label: "allow-https"
+            type: inbound
+            protocol: "TCP"
+            action: "ACCEPT"
+            ports: "443"
+            ipv4_addresses:
+              - "0.0.0.0/0"
+            ipv6_addresses:
+              - "::/0"
+          - rule: 
+            label: "allow-https"
+            type: inbound
+            protocol: "TCP"
+            action: "ACCEPT"
+            ports: "22"
+            ipv4_addresses:
+              - "0.0.0.0/0"
+            ipv6_addresses:
+              - "::/0"
+          - rule: 
+            label: "allow-outbound-udp"
+            type: outbound
+            protocol: "UDP"
+            action: "ACCEPT"
+            ports: "1-65535"
+            ipv4_addresses:
+              - "0.0.0.0/0"
+            ipv6_addresses:
+              - "::/0"
+          - rule: 
+            label: "allow-outbound-tcp"
+            type: outbound
+            protocol: "TCP"
+            action: "ACCEPT"
+            ports: "1-65535"
+            ipv4_addresses:
+              - "0.0.0.0/0"
+            ipv6_addresses:
+              - "::/0"

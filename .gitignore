@@ -1,0 +1,9 @@
+# terraform
+*.tfstate
+*.tfstate.backup
+.terraform
+.backup
+.terraform.lock.hcl
+hashicorp/
+/terraform
+

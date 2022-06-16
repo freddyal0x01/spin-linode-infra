@@ -1,0 +1,76 @@
+---
+- name: Get Credentials
+  hosts: all
+  gather_facts: false
+  connection: local
+  vars_prompt:
+    - name: linode_token
+      prompt: What is your Linode token?
+      private: yes
+  
+  tasks:
+  - name: Save credentials as global vars
+    set_fact:
+      linode_token: "{{ linode_token }}"
+    no_log: true
+
+- name: Deploy Terraform
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars: 
+    deploy: true
+  roles:
+      - { role: terraform }
+
+- name: Refresh Inventory
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  tasks:
+  - meta: refresh_inventory
+  - name: Wait for system to become reachable again
+    wait_for_connection:
+        delay: 10
+        timeout: 300
+
+- name: Apt Ready
+  gather_facts: yes
+  hosts: pwn
+  connection: ssh
+  become: True
+  vars: 
+    deploy: true
+  tasks:
+  - name: Apt for sure
+    apt: update_cache=yes
+    register: apt_status
+    until: apt_status is success
+    delay: 10
+    retries: 10
+
+- name: Install Roles
+  gather_facts: yes
+  hosts: pwn
+  connection: ssh
+  become: True
+  roles:
+    - { role: weareinteractive.users }
+    - { role: geerlingguy.pip }
+    - { role: geerlingguy.ntp }
+    - { role: geerlingguy.security }
+    - { role: docker }
+    - { role: os }
+
+- name: Install packages
+  gather_facts: yes
+  hosts: pwn
+  connection: ssh
+  become: True
+  vars: 
+    go_version: 1.18.3
+    username: freddyal
+  roles:
+    - { role: haxor }
+  tags: 
+    - after

@@ -1,0 +1,54 @@
+- name: Check if cargo is installed
+  shell: command -v cargo
+  register: cargo_exists
+  ignore_errors: yes
+
+- name: Download Rust Installer
+  when: cargo_exists is failed
+  get_url:
+    url: https://sh.rustup.rs
+    dest: /tmp/sh.rustup.rs
+    mode: '0755'
+    force: 'yes'
+
+- name: Install rust/cargo
+  when: cargo_exists is failed
+  shell: /tmp/sh.rustup.rs -y
+
+- name: Check if golang is installed
+  shell: command -v go
+  register: go_exists
+  ignore_errors: yes
+
+- name: Download Golang Installer and create directory
+  when: go_exists is failed
+  unarchive:
+    src: "https://go.dev/dl/go{{go_version}}.linux-amd64.tar.gz"
+    dest: /usr/local/
+    mode: '0755'
+    remote_src: yes
+
+- name: Add Golang Binary to the PATH Environment Variable
+  shell: echo 'export PATH=$PATH:/usr/local/go/bin' >> "/home/{{username}}/.profile"
+
+- name: Create Golang Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  with_items: 
+    - "/home/{{username}}/go/bin"
+    - "/home/{{username}}/go/src"
+    - "/home/{{username}}/go/pkg"
+
+- name: Refresh the source files
+  shell: source "/home/{{username}}/.profile" && source "/home/{{username}}/.cargo/env"
+
+- name: Install Hacking packages 
+  apt:
+    state: present
+    name: "{{ item }}"
+  with_items: 
+    - nmap
+    - samba

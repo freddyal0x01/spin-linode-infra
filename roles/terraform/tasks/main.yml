@@ -1,0 +1,10 @@
+---
+- include: generate.yml
+
+- include: deploy.yml
+    state="present"
+  when: deploy
+
+- include: destroy.yml
+    state="absent"
+  when: not deploy

@@ -4,5 +4,4 @@
     state: "{{ state }}"
     force_init: false
     variables:
-      ansible_ssh_key_private: "{{ lookup('file', '{{ ansible_ssh_private_key_file }}') }}"
       linode_token: "{{ linode_token }}"

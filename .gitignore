@@ -6,4 +6,4 @@
 .terraform.lock.hcl
 hashicorp/
 /terraform
-
+/inventory/inventory

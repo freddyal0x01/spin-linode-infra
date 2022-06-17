@@ -13,7 +13,7 @@
 
 - name: Install rust/cargo
   when: cargo_exists is failed
-  shell: /tmp/sh.rustup.rs -y
+  command: sh /tmp/sh.rustup.rs -y
 
 - name: Check if golang is installed
   shell: command -v go
@@ -43,7 +43,7 @@
     - "/home/{{username}}/go/pkg"
 
 - name: Refresh the source files
-  shell: source "/home/{{username}}/.profile" && source "/home/{{username}}/.cargo/env"
+  command: source "/home/{{username}}/.profile" && source "/home/{{username}}/.cargo/env"
 
 - name: Install Hacking packages 
   apt:

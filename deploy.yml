@@ -21,7 +21,7 @@
   vars: 
     deploy: true
   roles:
-      - { role: terraform }
+    - { role: terraform }
 
 - name: Refresh Inventory
   hosts: localhost
